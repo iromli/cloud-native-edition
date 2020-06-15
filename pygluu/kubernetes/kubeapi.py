@@ -3,12 +3,20 @@
  https://www.apache.org/licenses/LICENSE-2.0
 """
 
-from kubernetes import client, utils, config
-from kubernetes.stream import stream
-from .yamlparser import Parser
-from .common import get_logger, check_microk8s_kube_config_file
-import time
-import sys
+# TODO: Delete this script as soon as the kubernetes python client fixes CRD issue
+try:
+    from kubernetes import __version__  # noqa: F401
+except ModuleNotFoundError:
+    from .installclient import install_kubernetes_client_11_0_0
+    install_kubernetes_client_11_0_0()
+# End of section to be removed. TODO
+
+from kubernetes import client, utils, config  # noqa: E402
+from kubernetes.stream import stream  # noqa: E402
+from .yamlparser import Parser  # noqa: E402
+from .common import get_logger, check_microk8s_kube_config_file  # noqa: E402
+import time  # noqa: E402
+import sys  # noqa: E402
 
 logger = get_logger("gluu-kubernetes-api")
 
@@ -393,7 +401,7 @@ class Kubernetes(object):
         while response:
             try:
                 resp = self.network_cli.delete_namespaced_ingress(name, namespace, body=self.delete_options)
-            except client.rest.ApiException as e:
+            except client.rest.ApiException as e:  # noqa: F841
                 try:
                     resp = self.extenstion_cli.delete_namespaced_ingress(name, namespace, body=self.delete_options)
                 except client.rest.ApiException as e:
@@ -705,7 +713,7 @@ class Kubernetes(object):
                     manifest["metadata"]["namespace"] = namespace
                 utils.create_from_dict(self.api_client, manifest)
                 logger.info('Created {}/{}'.format(manifest["kind"], manifest["metadata"]["name"]))
-                retry = False
+                retry = False  # noqa: F841
             except (client.rest.ApiException, Exception) as e:
                 self.check_create_error_and_response(e, manifest["kind"], manifest["metadata"]["name"])
 
