@@ -16,19 +16,25 @@ logger = get_logger("python-k8-installer")
 # TODO: remove this section once fixed by kubernetes
 
 def install_kubernetes_client_11_0_0():
+    import importlib
+    import sys
+
+    if "kubernetes" in sys.modules:
+        return
+
     logger.warning("https://github.com/kubernetes-client/python/issues/1022"
                    " We have provided an in-house workaround for the issue regarding  building CRDs with"
                    " kubernetes client. This workaround will be removed once resolved by kubernetes")
+
     kubernetes_package = os.path.join(os.path.dirname(__file__), "templates/kubernetesv11.0.0.tar.gz")
-    kubernetes_package_setup = os.path.join(os.path.dirname(__file__),
-                                            "kubernetes-client/kubernetesv11.0.0/setup.py")
+    kubernetes_package_setup = os.path.join(  # noqa: F841
+        os.path.dirname(__file__), "kubernetes-client/kubernetesv11.0.0/setup.py",
+    )
     extract_kubernetes_client_tar(kubernetes_package)
     working_directory_kubernetes_client = os.path.join(os.path.dirname(__file__),
                                                        "kubernetes-client/kubernetesv11.0.0/kubernetes/__init__.py")
     module_path = working_directory_kubernetes_client
     module_name = "kubernetes"
-    import importlib
-    import sys
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
